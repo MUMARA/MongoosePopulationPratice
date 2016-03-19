@@ -1,45 +1,38 @@
 var mongoose = require('mongoose')
     , Schema = mongoose.Schema;
-mongoose.connect("mongodb://localhost:27017/yes");
+mongoose.connect("mongodb://localhost:27017/database");
 
 var personSchema = Schema({
-    id: Number,
-    name: String
+    name: String,
+    age: Number
 });
 
 var storySchema = Schema({
-    creator: String, stories: [{type: Number, ref: 'Story'}]
-})
+    _creator: {type: Schema.Types.ObjectId, ref: 'Person'},
+    title: String,
+});
 
-
-var Person = mongoose.model('Person', personSchema);
 var Story = mongoose.model('Story', storySchema);
+var Person = mongoose.model('Person', personSchema);
 
 
-var aaron = new Person({id: 5555555555, name: 'fahadRana'});
-var storyVariable = new Story({creator: 'umrfad'});
+var hasan = new Person({name: 'yesUmar', age: 24});
 
-aaron.save(function (err) {
-    if (err) {
-        return handleError(err);
-    }
-    else {
-        console.log("person aaron.save console.log is ", aaron.id, aaron.name);
-    }
+hasan.save(function (err, personSave) {
+    console.log("hasan.save personSave function is ", personSave)
 });
 
-storyVariable.save(function (err) {
-    if (err) {
-        return handleError(err);
-    }
-    else {
-        console.log(storyVariable.creator, storyVariable.id);
-    }
+var story1 = new Story({title: 'umarStories', _creator: hasan._id});
+
+story1.save(function (err, s) {
+
+    console.log("story1.save(function is ", s);
+}).then(function () {
+    return Story
+        .findOne({title: 'umarStories'})
+        .populate('_creator')
+        .exec(function (err, story) {
+            if (err) return handleError(err);
+            console.log('The creator is %s', story);
+        });
 });
-
-
-Person.findOne({id: 5555555555, name: 'fahadRana'})
-console.log('The person id & name is %s', aaron.id, aaron.name);
-
-Story.findOne({creator: 'umrfad'})
-console.log('The creator is %s', storyVariable.creator, storyVariable.id);
